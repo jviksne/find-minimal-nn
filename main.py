@@ -39,13 +39,14 @@ MIN_LAYER_NODE_COUNT = 1 # Minimal neural network layer node count
 LEARN_RATE = 1e-2 # Learning rate (1e-2 = 0.01)
 MAX_EPOCHS = 50000 # Max epochs
 SECTION_SEPARATOR = "-" * 20
-BATCH_SIZE = 1 # 1: stochastic,
-               # <= 0: batch,
-               # >1 - mini-batch or batch
-EVALUATE_AFTER_EPOCHS = 1
+BATCH_SIZE = 1000 # 1: stochastic,
+                  # <= 0: batch,
+                  # >1 - mini-batch or batch
+EVALUATE_AFTER_EPOCHS = 100
 PRINT_WEIGHTS = True
 PRINT_SAMPLES = True
 MAX_NODE_COUNT = 100
+PREFER_DEVICE = "cpu" # "cpu", "cuda", None; if None then "cuda" will be used if available
 
 def print_section(title: str):
     print(SECTION_SEPARATOR+"\n"+title+"\n"+SECTION_SEPARATOR)
@@ -110,7 +111,7 @@ def look_for_minimal_nn(dataset: Dataset,
             break # do not check larger node counts
 
 
-device = init_device()
+device = init_device(PREFER_DEVICE)
 
 # Look for the minimal node count that is capable to solve boolean OR
 print_section("Looking for a minimal NN that solves binary 'OR'\n input: [a, b], output: [a OR b]")

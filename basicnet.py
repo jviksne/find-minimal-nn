@@ -29,12 +29,19 @@ from torch.utils.data import Dataset
 # Indicates whether a device for PyTorch calculations has been chosen
 device:Literal['cpu','cuda'] = None
 
-def init_device():
+def init_device(prefer_device:str = None):
     global device
-    # Get cpu or gpu device for training if not init
-    if device == None:
+    
+    if device != None:
+        return device
+
+    if prefer_device != None:
+        device = prefer_device
+    else:
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"Using {device} device")
+
+    print(f"Using {device} device")
+    return device
 
 class BasicNet(nn.Module):
     r"""A neural network with 
@@ -63,11 +70,12 @@ class BasicNet(nn.Module):
             self.linear_relu_stack.append(nn.Linear(
                     in_features=prev_layer_size,
                     out_features=layer_size,
-                    bias=True))
+                    bias=True,
+                    device=device))
             self.linear_relu_stack.append(nn.Sigmoid())  # Sigmoid activation function - 1 / (1 + torch.exp(-f(x)))
             prev_layer_size = layer_size
 
-        self.linear_relu_stack.append(nn.Linear(in_features=prev_layer_size, out_features=out_size, bias=True))
+        self.linear_relu_stack.append(nn.Linear(in_features=prev_layer_size, out_features=out_size, bias=True, device=device))
         self.linear_relu_stack.append(nn.Sigmoid())
 
         # print(self.linear_relu_stack) # to print out the layout
@@ -88,11 +96,11 @@ class BasicNet(nn.Module):
 
         global device
 
-        #size = len(dataloader.dataset)
-        self.train()
+        self.train() # enter training mode
+
         for (X, y) in dataloader:
 
-            X, y = X.to(device), y.to(device)
+            #X, y = X.to(device), y.to(device)
 
             # Compute prediction error
             pred = self(X)
