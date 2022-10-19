@@ -27,6 +27,7 @@
 # No splitting into training and test data sets, a NN is considered to be found if it produces a valid output for all inputs.
 # No regularization.
 
+from tkinter.tix import MAX
 from utils import get_combinations
 from basicnet import BasicNet, init_device
 from logicaldata import LogicalDataset
@@ -39,21 +40,23 @@ MIN_LAYER_NODE_COUNT = 1 # Minimal neural network layer node count
 LEARN_RATE = 1e-2 # Learning rate (1e-2 = 0.01)
 MAX_EPOCHS = 50000 # Max epochs
 SECTION_SEPARATOR = "-" * 20
-BATCH_SIZE = 1000 # 1: stochastic,
-                  # <= 0: batch,
-                  # >1 - mini-batch or batch
+DEFAULT_BATCH_SIZE = 1 # 1: stochastic,
+                       # <= 0: batch,
+                       # >1 - mini-batch or batch
 EVALUATE_AFTER_EPOCHS = 100
 PRINT_WEIGHTS = True
 PRINT_SAMPLES = True
 MAX_NODE_COUNT = 100
 PREFER_DEVICE = "cpu" # "cpu", "cuda", None; if None then "cuda" will be used if available
 
+
 def print_section(title: str):
     print(SECTION_SEPARATOR+"\n"+title+"\n"+SECTION_SEPARATOR)
 
+
 def look_for_minimal_nn(dataset: Dataset,
                         max_node_count:int = MAX_NODE_COUNT,
-                        batch_size:int = BATCH_SIZE,
+                        batch_size:int = DEFAULT_BATCH_SIZE,
                         learn_rate:float = LEARN_RATE,
                         sample_count:int = -1):
 
@@ -82,7 +85,7 @@ def look_for_minimal_nn(dataset: Dataset,
             # do the training
             for i in range(MAX_EPOCHS):
 
-                nn.train_epoch(dataloader, i)
+                nn.train_epoch(dataloader, i, i == MAX_EPOCHS - 1)
 
                 # check once in a while if all data doesn't already
                 # return correct values
@@ -128,5 +131,5 @@ look_for_minimal_nn(LogicalDataset('xor', device))
 # Look for the minimal node count that is capable 
 for max_val in [1, 10, 100, 1024]:
     print_section(f"Looking for a minimal NN that can compare numbers <={max_val}\n input: [a, b], output: [a < b, a > b] where 0 <= a,b <= {max_val}")
-    look_for_minimal_nn(dataset=NumberComparisonDataset(max_val, device), sample_count=4)
+    look_for_minimal_nn(dataset=NumberComparisonDataset(max_val, device), sample_count=4, batch_size=max_val * 10)
 

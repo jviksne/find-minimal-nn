@@ -92,7 +92,7 @@ class BasicNet(nn.Module):
         logits = self.linear_relu_stack(x)
         return logits
 
-    def train_epoch(self, dataloader: DataLoader, epoch: int):
+    def train_epoch(self, dataloader: DataLoader, epoch: int, is_last: bool = False):
 
         global device
 
@@ -114,6 +114,9 @@ class BasicNet(nn.Module):
             self.calculation_count = self.calculation_count + 1
             if self.calculation_count % 100 == 0:
                 print (f'Layout {self.hidden_layer_sizes}, epoch {epoch}, loss {loss}', end='\r')
+
+        if is_last:
+            print()
 
     def is_correct_for_all(self, dataset: Dataset):
         for i in range(len(dataset)): # Dataset may not be iterable over values

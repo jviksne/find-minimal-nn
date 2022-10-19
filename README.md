@@ -1,5 +1,5 @@
 # find-minimal-nn
-A toy project for trying out PyTorch. Looks for a minimal neural network capable to perform "OR", "AND", "XOR" boolean operations and less than "<" and equal "=" comparisons.
+A toy project for trying out PyTorch. Looks for a minimal neural network capable to perform "OR", "AND", "XOR" boolean operations and less than "<" and greater than ">" comparisons.
  
 # Setup and run
 
