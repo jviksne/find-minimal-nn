@@ -47,8 +47,8 @@ EVALUATE_AFTER_EPOCHS = 100
 PRINT_WEIGHTS = True
 PRINT_SAMPLES = True
 MAX_NODE_COUNT = 100
-PREFER_DEVICE = None # "cpu", "cuda", None
-                     # if None then "cuda" will be used if available
+PREFER_DEVICE = "cpu" # "cpu", "cuda", None
+                      # if None then "cuda" will be used if available
 
 
 def print_section(title: str):
@@ -138,6 +138,7 @@ device = init_device(PREFER_DEVICE)
 # Look for the minimal node count that is capable to solve boolean OR
 print_section("Looking for a minimal NN that solves binary 'OR'\n"
               " input: [a, b], output: [a OR b]")
+
 look_for_minimal_nn(LogicalDataset('or', device))
 
 # Look for the minimal node count that is capable to solve boolean AND
@@ -155,8 +156,8 @@ look_for_minimal_nn(LogicalDataset('xor', device))
 for max_val, train_size, batch_size, learn_rate, do_mean_norm in [
         [1, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE, False],
         [10, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE, True],
-        [99, 1000, 100, 1e-2, True],
-        [999, 100000, 100, 1e-5, True]
+        [99, 1000, 100, DEFAULT_LEARN_RATE, True],
+        [999, 100000, 100, 1e-3, True]
     ]:
     print_section(f"Looking for a minimal NN that can compare numbers "
                   f"<={max_val}\n input: [a, b], output: [a < b, a > b] "

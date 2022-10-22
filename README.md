@@ -24,7 +24,7 @@ python main.py
 * The loss function is: $J(\theta) = - \frac{1}{m} \displaystyle \sum_{i=1}^m [y^{(i)}\log (h_\theta (x^{(i)})) + (1 - y^{(i)})\log (1 - h_\theta(x^{(i)}))]$
 * The learning algorithm is gradient descend, which, depending on the configured sample size can behave as a stochastic gradient descent (if batch_sample_size is set to 1), mini-batch (if batch_sample_size is set to less than the dataset size) or batch (if batch_sample_size matches the dataset size).
 * The comparsion function input data for input sets that contain values greater than 1 are preprocessed by applying mean normalization: $x_i := \dfrac{x_i - \mu_i}{s_i}$
-
+* Learning rate: 0.01
 
 When iterating over all of the possible combinations of a certain node count the algorithm begins with all combinations of nodes for the current layer count before increasing it. After layer count increases it restarts with all extra nodes moved to the first layer, each time moving the first movable node from the left to the nearest layer on the right.
 
@@ -102,6 +102,14 @@ Comparison of two integers (with neural network producing valid inequality opera
 ```
 
 * Sample output for for comparing integers from 0 to 999:
+
+```
+0.weight [[ 11.733412 -11.735888]]
+0.bias [-0.13835377]
+2.weight [[-12.713495]
+ [ 12.741911]]
+2.bias [ 5.9011207 -5.947039 ]
+```
 
 # Issues
 
