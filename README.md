@@ -18,8 +18,8 @@ python main.py
 
 # Implementation details
 
-* Each node of the previous layer is connected to each node of the following layer: $y = xA^T + b$
-* The input for the activation function of the following layer is calculated by summing the multiplication of incoming weights with incoming node values.
+* Each node of the previous layer is connected to each node of the following layer.
+* The input for the activation function of the following layer is calculated by summing the multiplication of incoming weights with incoming node values: $y = xA^T + b$
 * The activation function for each node is: $S(x)={\frac {1}{1+e^{-x}}}$
 * The loss function is: $J(\theta) = - \frac{1}{m} \displaystyle \sum_{i=1}^m [y^{(i)}\log (h_\theta (x^{(i)})) + (1 - y^{(i)})\log (1 - h_\theta(x^{(i)}))]$
 * The learning algorithm is gradient descend, which, depending on the configured sample size can behave as a stochastic gradient descent (if batch_sample_size is set to 1), mini-batch (if batch_sample_size is set to less than the dataset size) or batch (if batch_sample_size matches the dataset size).
