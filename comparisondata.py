@@ -26,11 +26,11 @@ class NumberComparisonDataset(Dataset):
     def __init__(self,
                  max: int,
                  device: str = None,
-                 do_mean_normalization: bool = True):
+                 do_mean_norm: bool = True):
         super(NumberComparisonDataset).__init__()
         self.up_to = max + 1
         self.device = device
-        self.do_mean_normalization = do_mean_normalization
+        self.do_mean_normalization = do_mean_norm
         self.mean = sum(range(self.up_to)) / self.up_to
 
     def __len__(self):

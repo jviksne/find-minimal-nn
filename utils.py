@@ -25,10 +25,10 @@ def get_combinations(node_count: int, min_layer_node_count: int = 1):
     Each combination will be returned as a list of integers indicating the
     node count at each layer.
 
-    Starts with all combinations of nodes for the current layer count before
-    increasing it. After layer count increase restarts with all extra nodes
-    moved to the first layer, each time moving the first movable node from the
-    left to the nearest layer on the right.
+    The algorithm begins with all combinations of nodes for the current layer
+    count before increasing it. After layer count increases it restarts with
+    all extra nodes moved to the first layer, each time moving the first
+    movable node from the left to the nearest layer on the right.
 
     Example for node_count=4, min_layer_node_count=1:
     [4]

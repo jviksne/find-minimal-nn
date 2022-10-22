@@ -23,7 +23,7 @@ python main.py
 * The activation function for each node is: $S(x)={\frac {1}{1+e^{-x}}}$
 * The loss function is: $J(\theta) = - \frac{1}{m} \displaystyle \sum_{i=1}^m [y^{(i)}\log (h_\theta (x^{(i)})) + (1 - y^{(i)})\log (1 - h_\theta(x^{(i)}))]$
 * The learning algorithm is gradient descend, which, depending on the configured sample size can behave as a stochastic gradient descent (if batch_sample_size is set to 1), mini-batch (if batch_sample_size is set to less than the dataset size) or batch (if batch_sample_size matches the dataset size).
-* The comparsion function input data are preprocessed by applying mean normalization: $x_i := \dfrac{x_i - \mu_i}{s_i}$
+* The comparsion function input data for input sets that contain values greater than 1 are preprocessed by applying mean normalization: $x_i := \dfrac{x_i - \mu_i}{s_i}$
 
 
 When iterating over all of the possible combinations of a certain node count the algorithm begins with all combinations of nodes for the current layer count before increasing it. After layer count increases it restarts with all extra nodes moved to the first layer, each time moving the first movable node from the left to the nearest layer on the right.
@@ -69,36 +69,36 @@ XOR requires two nodes to be arranged in a single hidden layer where nodes cance
 2.bias [-1.9593607]
 ```
 
-Comparison of two integers (with neural network producing valid inequality operation - ">" and "<" - results in two output nodes and both being 0 indicating an equality) works with a single node hidden layer (note that here the mean normalization is applied to the inputs):
+Comparison of two integers (with neural network producing valid inequality operation - ">" and "<" - results in two output nodes and both being 0 indicating an equality) works with a single node hidden layer.
 
-* weights for comparing 0 and 1:
-
-```
-0.weight [[ 2.393474 -2.827444]]
-0.bias [0.27705863]
-2.weight [[-3.7296197] [ 2.5218446]]
-2.bias [ 0.40044788 -2.3560894 ]
-```
-
-* weights for comparing integers from 0 to 10:
+* Sample output for comparing 0 and 1:
 
 ```
-0.weight [[-2.2160113  2.1910453]]
-0.bias [0.0598193]
-2.weight [[ 4.40381 ] [-4.573212]]
-2.bias [-2.3822563  1.6917874]
+0.weight [[-3.0167425  2.9965193]]
+0.bias [-0.35470104]
+2.weight [[ 4.000025] [-3.651333]]
+2.bias [-3.0536509   0.12493792]
 ```
 
-* weights for comparing integers from 0 to 99:
+* Sample output for comparing integers from 0 to 10  (note that for this and larger number comparisons the mean normalization is applied to the inputs):
 
 ```
-0.weight [[-5.195115   5.1957483]]
-0.bias [-0.06437927]
-2.weight [[  9.759042] [-10.104785]]
-2.bias [-5.2375793  4.279991 ]
+0.weight [[-4.450456   4.5212965]]
+0.bias [-0.20523731]
+2.weight [[ 4.483545] [-4.940106]]
+2.bias [-2.2536952  1.9412361]
 ```
 
-* weights for comparing 0 to 999:
+* Sample output for comparing integers from 0 to 99:
+
+```
+0.weight [[ 5.658082 -5.658709]]
+0.bias [-0.17585063]
+2.weight [[-5.9274735] [ 6.230655 ]]
+2.bias [ 2.631637  -2.8514955]
+```
+
+* Sample output for for comparing integers from 0 to 999:
 
 # Issues
 

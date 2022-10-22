@@ -138,26 +138,34 @@ device = init_device(PREFER_DEVICE)
 # Look for the minimal node count that is capable to solve boolean OR
 print_section("Looking for a minimal NN that solves binary 'OR'\n"
               " input: [a, b], output: [a OR b]")
-#look_for_minimal_nn(LogicalDataset('or', device))
+look_for_minimal_nn(LogicalDataset('or', device))
 
 # Look for the minimal node count that is capable to solve boolean AND
 print_section("Looking for a minimal NN that solves binary 'AND'\n"
               " input: [a, b], output: [a AND b]")
-#look_for_minimal_nn(LogicalDataset('and', device))
+look_for_minimal_nn(LogicalDataset('and', device))
 
 # Look for the minimal node count that is capable to solve boolean AND
 print_section("Looking for a minimal NN that solves binary 'XOR'\n"
               " input: [a, b], output: [a XOR b]")
-#look_for_minimal_nn(LogicalDataset('xor', device))
+look_for_minimal_nn(LogicalDataset('xor', device))
 
 # Look for the minimal node count that is capable to compare numbers
 # of certain sizes
-for max_val, train_size, batch_size, learn_rate in [
-        #[1, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE],
-        #[10, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE],
-        [99, 1000, 100, 1e-2],
-        [999, 100000, 100, 1e-5]
+for max_val, train_size, batch_size, learn_rate, do_mean_norm in [
+        [1, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE, False],
+        [10, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE, True],
+        [99, 1000, 100, 1e-2, True],
+        [999, 100000, 100, 1e-5, True]
     ]:
-    print_section(f"Looking for a minimal NN that can compare numbers <={max_val}\n input: [a, b], output: [a < b, a > b] where 0 <= a,b <= {max_val}")
-    look_for_minimal_nn(dataset=NumberComparisonDataset(max_val, device), print_sample_count=4, train_size=train_size, batch_size=batch_size, learn_rate=learn_rate)
+    print_section(f"Looking for a minimal NN that can compare numbers "
+                  f"<={max_val}\n input: [a, b], output: [a < b, a > b] "
+                  f"where 0 <= a,b <= {max_val}")
+    look_for_minimal_nn(dataset=NumberComparisonDataset(max_val,
+                                                        device,
+                                                        do_mean_norm=do_mean_norm),
+                        print_sample_count=4,
+                        train_size=train_size,
+                        batch_size=batch_size,
+                        learn_rate=learn_rate)
 
