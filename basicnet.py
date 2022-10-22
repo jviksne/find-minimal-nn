@@ -58,47 +58,63 @@ class BasicNet(nn.Module):
 
         init_device()
 
-        self.hidden_layer_sizes = hidden_layer_sizes # save to be able to print out
+        # Save the layer info to be able to print it out
+        self.hidden_layer_sizes = hidden_layer_sizes
 
         # Init the layer stack
-        self.linear_relu_stack = nn.Sequential()
+        self.layer_stack = nn.Sequential()
 
         # Append layers        
         prev_layer_size = in_size
 
         for layer_size in hidden_layer_sizes:
-            self.linear_relu_stack.append(nn.Linear(
+            self.layer_stack.append(nn.Linear(
                     in_features=prev_layer_size,
                     out_features=layer_size,
                     bias=True,
                     device=device))
-            self.linear_relu_stack.append(nn.Sigmoid())  # Sigmoid activation function - 1 / (1 + torch.exp(-f(x)))
+            self.layer_stack.append(nn.Sigmoid()) # 1 / (1 + torch.exp(-f(x)))
             prev_layer_size = layer_size
 
-        self.linear_relu_stack.append(nn.Linear(in_features=prev_layer_size, out_features=out_size, bias=True, device=device))
-        self.linear_relu_stack.append(nn.Sigmoid())
+        self.layer_stack.append(nn.Linear(
+            in_features=prev_layer_size,
+            out_features=out_size,
+            bias=True,
+            device=device))
+        self.layer_stack.append(nn.Sigmoid())
 
-        # print(self.linear_relu_stack) # to print out the layout
+        # print(self.layer_stack) # to print out the layout
 
-        # Init loss function: -(y * log(f(x)) + (1 - y) * log(1 - f(x))) with 100 as the maximum value
+        # Init loss function: -(y * log(f(x)) + (1 - y) * log(1 - f(x)))
+        # with 100 as the maximum value
         self.loss_fn = nn.BCELoss(reduction='mean')
 
         # Use gradient descent
-        self.optimizer = torch.optim.SGD(self.linear_relu_stack.parameters(), lr=learn_rate)
+        self.optimizer = torch.optim.SGD(self.layer_stack.parameters(),
+                                         lr=learn_rate)
 
-        self.calculation_count = 0 # increased upon each backpropogation, determines when to print status update
+        # increased upon each backpropogation,
+        # determines when to print status update
+        self.calculation_count = 0
 
     def forward(self, x):
-        logits = self.linear_relu_stack(x)
+        logits = self.layer_stack(x)
         return logits
 
-    def train_epoch(self, dataloader: DataLoader, epoch: int, is_last: bool = False):
+    def train_epoch(self,
+                    dataloader: DataLoader,
+                    epoch: int):
 
         global device
 
         self.train() # enter training mode
 
-        for (X, y) in dataloader:
+        #print(f"epoch {epoch}")
+
+        for batch, (X, y) in enumerate(dataloader):
+
+            #print(f"len(x): {len(X)}")
+            #print(X)
 
             #X, y = X.to(device), y.to(device)
 
@@ -108,51 +124,65 @@ class BasicNet(nn.Module):
 
             # Backpropagation
             self.optimizer.zero_grad() # clear old gradients
-            loss.backward()  # calculate new gradients for all parameters (stored as attributes of parameters)
+            loss.backward()  # calculate new gradients for all parameters
+                             # (stored as attributes of parameters)
             self.optimizer.step() # do the update
 
-            self.calculation_count = self.calculation_count + 1
             if self.calculation_count % 100 == 0:
-                print (f'Layout {self.hidden_layer_sizes}, epoch {epoch}, loss {loss}', end='\r')
-
-        if is_last:
-            print()
+                print (f'\rLayout {self.hidden_layer_sizes}, '
+                       f'epoch {epoch + 1}, batch {batch + 1} loss {loss}', end='')
+            self.calculation_count = self.calculation_count + 1
 
     def is_correct_for_all(self, dataset: Dataset):
-        for i in range(len(dataset)): # Dataset may not be iterable over values
-            data = dataset[i]
+        
+        for i in range(len(dataset)):
+            data = dataset[i] # Dataset may not be iterable over values
             pred = torch.round(self(data[0]))
             if not torch.equal(pred, data[1]):
                 return (data[0], data[1], pred)
         return True
 
-    def print_random_samples(self, dataset: Dataset, count: int = -1):
+    def print_random_samples(self,
+                             dataset, #no Dataset type hint because using custom functions
+                             count: int = -1,
+                             print_denormalized: bool = True): # 
         if count < 0:
             samples = range(0, len(dataset))
         else:
             samples = random.sample(range(0, len(dataset)), count)
         for sample_index, dataset_index in enumerate(samples):
-            X, _ = dataset[dataset_index]
-            print(f"---Sample #{sample_index}---\n{X.detach().to('cpu').numpy()}\n{self(X).detach().to('cpu').numpy()}\n")
+            normalized_x, actual_x = dataset.get_input(dataset_index, True)
+
+            if not print_denormalized:
+                actual_x = normalized_x
+                
+            print(f"---Sample #{sample_index}---\n"
+                  f"{actual_x}\n"
+                  f"{self(normalized_x).detach().to('cpu').numpy()}\n")
 
     def print_weights(self, print_header: bool = True):
         if (print_header):
             print("---Weights:---")
-        for name, param in self.linear_relu_stack.named_parameters():
+        for name, param in self.layer_stack.named_parameters():
             print(f"{name} {param.detach().to('cpu').numpy()}")
 
     def get_weights(self, index:int):
         index = index * 2
-        for curr_index, param in enumerate(self.linear_relu_stack.parameters()):
+        for curr_index, param in enumerate(
+            self.layer_stack.parameters()):
             if curr_index == index:
                 return param
     
     def get_bias(self, index:int):
         index = index * 2 + 1
-        for curr_index, param in enumerate(self.linear_relu_stack.parameters()):
+        for curr_index, param in enumerate(
+            self.layer_stack.parameters()):
             if curr_index == index:
                 return param
 
+    # Temporary test function created to verify that the chosen PyTorch
+    # functions perform exactly the same calculations as described by
+    # Andrew Ng in the Coursera's online Machine Learning course.
     def manual_gd_calc(self, learn_rate: float, x:torch.Tensor, y:torch.Tensor):
 
         # Feedforward
@@ -163,7 +193,7 @@ class BasicNet(nn.Module):
 
         # Loop through regular and bias node weights (which are present in sequental
         # order one by one with regular weights coming first and bias weights afterwards).
-        for index, param in enumerate(self.linear_relu_stack.parameters()):
+        for index, param in enumerate(self.layer_stack.parameters()):
             if index % 2 == 1:
                 reg_weights.append(param.detach().clone())
             else:

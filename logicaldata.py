@@ -23,10 +23,17 @@ from torch.utils.data import Dataset
 from typing import Literal
 
 class LogicalDataset(Dataset):
-    def __init__(self, op: Literal['or', 'and', 'xor'], device: str = None):
+    def __init__(self,
+                 op: Literal['or', 'and', 'xor'],
+                 device: str = None,
+                 do_mean_normalization: bool = False):
         super(LogicalDataset).__init__()
         self.op = op
         self.device = device
+        self.enable_mean_normalization(do_mean_normalization)
+
+    def enable_mean_normalization(self, enable: bool = True):
+        self.do_mean_normalization = enable
 
     def __len__(self):
         return 2 ** 2
@@ -38,25 +45,46 @@ class LogicalDataset(Dataset):
         return 1 # true or false
 
     def __getitem__(self, index):
-        quotient, modulo = divmod(index, 2)
+
+        [[quotient, modulo], _] = self.get_input(index, False)
 
         res = 0.
 
-        match self.op:
-            case 'or':
-                if quotient == 1 or modulo == 1:
+        if self.op == 'or':
+                if quotient > 0 or modulo > 0:
                     res = 1.
-            case 'and':
-                if quotient == 1 and modulo == 1:
+        elif self.op == 'and':
+                if quotient > 0 and modulo > 0:
                     res = 1.
-            case 'xor':
+        elif self.op == 'xor':
                 if quotient != modulo:
                     res = 1.
 
-        return (torch.tensor(data = [float(quotient), float(modulo)],
+        return (torch.tensor(data = [quotient, modulo],
                              device = self.device),
                 torch.tensor(data = [res,],
                              device = self.device))
+
+    def get_input(self,
+                                       index,
+                                       train_data_as_tensor: bool):
+        quotient, modulo = divmod(index, 2)
+
+        quotient, modulo = float(quotient), float(modulo)
+
+        if self.do_mean_normalization:
+            quotient_norm = quotient - 0.5
+            modulo_norm = modulo - 0.5
+        else:
+            quotient_norm = quotient
+            modulo_norm = modulo
+
+        train_data = [quotient_norm, modulo_norm]
+        if train_data_as_tensor:
+            train_data = torch.tensor(data=train_data,
+                                      device=self.device)
+
+        return [train_data, [quotient, modulo]]
 
 
 #data = LogicalDataset('xor')

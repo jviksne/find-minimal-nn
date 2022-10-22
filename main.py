@@ -27,17 +27,17 @@
 # No splitting into training and test data sets, a NN is considered to be found if it produces a valid output for all inputs.
 # No regularization.
 
-from tkinter.tix import MAX
 from utils import get_combinations
 from basicnet import BasicNet, init_device
 from logicaldata import LogicalDataset
 from comparisondata import NumberComparisonDataset
+import torch
 from torch.utils.data.dataloader import DataLoader
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, RandomSampler
 
 # Constants
 MIN_LAYER_NODE_COUNT = 1 # Minimal neural network layer node count
-LEARN_RATE = 1e-2 # Learning rate (1e-2 = 0.01)
+DEFAULT_LEARN_RATE = 1e-2 # Learning rate (1e-2 = 0.01)
 MAX_EPOCHS = 50000 # Max epochs
 SECTION_SEPARATOR = "-" * 20
 DEFAULT_BATCH_SIZE = 1 # 1: stochastic,
@@ -47,23 +47,34 @@ EVALUATE_AFTER_EPOCHS = 100
 PRINT_WEIGHTS = True
 PRINT_SAMPLES = True
 MAX_NODE_COUNT = 100
-PREFER_DEVICE = "cpu" # "cpu", "cuda", None; if None then "cuda" will be used if available
+PREFER_DEVICE = None # "cpu", "cuda", None
+                     # if None then "cuda" will be used if available
 
 
 def print_section(title: str):
     print(SECTION_SEPARATOR+"\n"+title+"\n"+SECTION_SEPARATOR)
 
 
-def look_for_minimal_nn(dataset: Dataset,
+def look_for_minimal_nn(dataset, # no Dataset type hint because using custom functions
                         max_node_count:int = MAX_NODE_COUNT,
                         batch_size:int = DEFAULT_BATCH_SIZE,
-                        learn_rate:float = LEARN_RATE,
-                        sample_count:int = -1):
+                        learn_rate:float = DEFAULT_LEARN_RATE,
+                        train_size:int = None,
+                        print_sample_count:int = -1):
 
     if batch_size <= 0:
         batch_size = len(dataset)
 
-    dataloader = DataLoader(dataset=dataset, batch_size=batch_size)
+    if train_size != None:
+        sampler = RandomSampler(data_source=dataset,
+                                num_samples=train_size,
+                                replacement=True)
+    else:
+        sampler = None
+    
+    dataloader = DataLoader(dataset=dataset,
+                            batch_size=batch_size,
+                            sampler=sampler)
 
     node_count_found = False
 
@@ -85,12 +96,15 @@ def look_for_minimal_nn(dataset: Dataset,
             # do the training
             for i in range(MAX_EPOCHS):
 
-                nn.train_epoch(dataloader, i, i == MAX_EPOCHS - 1)
+                nn.train_epoch(dataloader, i)
 
                 # check once in a while if all data doesn't already
                 # return correct values
                 if ((i == MAX_EPOCHS - 1 or i % EVALUATE_AFTER_EPOCHS == 0)
                     and nn.is_correct_for_all(dataset) == True): 
+
+                    print() # print newline after train_epoch because it
+                            # keeps printing status on one and the same line 
 
                     # if correct values are returned for all data
                     # then do not proceed with larger node counts
@@ -106,30 +120,44 @@ def look_for_minimal_nn(dataset: Dataset,
                         print()
 
                     if PRINT_SAMPLES:
-                        nn.print_random_samples(dataset, sample_count)
+                        nn.print_random_samples(dataset, print_sample_count)
 
                     break
 
         if node_count_found:
             break # do not check larger node counts
 
+    if not node_count_found:
+        # print newline after train_epoch since it was not printed upon
+        # converge
+        print() 
+
 
 device = init_device(PREFER_DEVICE)
 
 # Look for the minimal node count that is capable to solve boolean OR
-print_section("Looking for a minimal NN that solves binary 'OR'\n input: [a, b], output: [a OR b]")
-look_for_minimal_nn(LogicalDataset('or', device))
+print_section("Looking for a minimal NN that solves binary 'OR'\n"
+              " input: [a, b], output: [a OR b]")
+#look_for_minimal_nn(LogicalDataset('or', device))
 
 # Look for the minimal node count that is capable to solve boolean AND
-print_section("Looking for a minimal NN that solves binary 'AND'\n input: [a, b], output: [a AND b]")
-look_for_minimal_nn(LogicalDataset('and', device))
+print_section("Looking for a minimal NN that solves binary 'AND'\n"
+              " input: [a, b], output: [a AND b]")
+#look_for_minimal_nn(LogicalDataset('and', device))
 
 # Look for the minimal node count that is capable to solve boolean AND
-print_section("Looking for a minimal NN that solves binary 'XOR'\n input: [a, b], output: [a XOR b]")
-look_for_minimal_nn(LogicalDataset('xor', device))
+print_section("Looking for a minimal NN that solves binary 'XOR'\n"
+              " input: [a, b], output: [a XOR b]")
+#look_for_minimal_nn(LogicalDataset('xor', device))
 
-# Look for the minimal node count that is capable 
-for max_val in [1, 10, 100, 1024]:
+# Look for the minimal node count that is capable to compare numbers
+# of certain sizes
+for max_val, train_size, batch_size, learn_rate in [
+        #[1, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE],
+        #[10, None, DEFAULT_BATCH_SIZE, DEFAULT_LEARN_RATE],
+        [99, 1000, 100, 1e-2],
+        [999, 100000, 100, 1e-5]
+    ]:
     print_section(f"Looking for a minimal NN that can compare numbers <={max_val}\n input: [a, b], output: [a < b, a > b] where 0 <= a,b <= {max_val}")
-    look_for_minimal_nn(dataset=NumberComparisonDataset(max_val, device), sample_count=4, batch_size=max_val * 10)
+    look_for_minimal_nn(dataset=NumberComparisonDataset(max_val, device), print_sample_count=4, train_size=train_size, batch_size=batch_size, learn_rate=learn_rate)
 

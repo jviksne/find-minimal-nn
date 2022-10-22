@@ -9,17 +9,12 @@ Note that the neural network may get stuck in local optima or may not converge a
  
 # Setup and run
 
-Install PyTorch by following the instructions from https://pytorch.org/.
+Install PyTorch by following the instructions at https://pytorch.org/.
 
 Download and extract the files from this repository to some directory and run:
 ```bash
 python main.py
 ```
-
-# Configuration
-
-* Default learning rate is 0.01.
-* Batch size
 
 # Implementation details
 
@@ -31,14 +26,42 @@ python main.py
 
 When iterating over the all possible combinations of a certain node count the algorithm arranges the nodes the following way:
 
-
 # Results
 
 AND and OR operations work with a single node hidden layer (it would work with no hidden layers at all and weights going straight to the output node). Sample output:
 
 XOR requires two nodes to be arranged in a single hidden layer where nodes cancel each other when weights go to the output layer if both of them are activated. Sample output:
 
-Comparison of two integers (with neural network producing valid inequality operation - ">" and "<" - results in two output nodes and both being 0 indicating an equality) depends on the maximum size of the integer:
+Comparison of two integers (with neural network producing valid inequality operation - ">" and "<" - results in two output nodes and both being 0 indicating an equality) works with a single node hidden layer:
+
+* weights for comparing 0 and 1:
+
+```
+0.weight [[ 2.393474 -2.827444]]
+0.bias [0.27705863]
+2.weight [[-3.7296197] [ 2.5218446]]
+2.bias [ 0.40044788 -2.3560894 ]
+```
+
+* weights for comparing integers from 0 to 10:
+
+```
+0.weight [[-2.2160113  2.1910453]]
+0.bias [0.0598193]
+2.weight [[ 4.40381 ] [-4.573212]]
+2.bias [-2.3822563  1.6917874]
+```
+
+* weights for comparing integers from 0 to 99:
+
+```
+0.weight [[-5.195115   5.1957483]]
+0.bias [-0.06437927]
+2.weight [[  9.759042] [-10.104785]]
+2.bias [-5.2375793  4.279991 ]
+```
+
+* weights for comparing 0 to 999:
 
 # Issues
 
