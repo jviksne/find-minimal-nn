@@ -42,11 +42,34 @@ For example, if node count is 4 and minimal layer node count is set to 1 then th
 
 # Results
 
-AND and OR operations work with a single node hidden layer (it would work with no hidden layers at all and weights going straight to the output node). Sample output:
+OR and AND operations work with a single node hidden layer (it would work with no hidden layers at all and weights going straight to the output node). Sample output for OR:
+
+```
+0.weight [[2.2405872 2.2749467]]
+0.bias [-1.223995]
+2.weight [[3.4729319]]
+2.bias [-0.85417444]
+```
+
+Sample output for AND:
+```
+0.weight [[-1.9562051 -1.9832208]]
+0.bias [2.1289062]
+2.weight [[-4.1473875]]
+2.bias [0.6603181]
+```
 
 XOR requires two nodes to be arranged in a single hidden layer where nodes cancel each other when weights go to the output layer if both of them are activated. Sample output:
 
-Comparison of two integers (with neural network producing valid inequality operation - ">" and "<" - results in two output nodes and both being 0 indicating an equality) works with a single node hidden layer:
+```
+0.weight [[4.058795  4.177402 ]
+ [1.2133992 1.3914024]]
+0.bias [-1.0793928 -1.5911556]
+2.weight [[ 4.158029  -3.0204496]]
+2.bias [-1.9593607]
+```
+
+Comparison of two integers (with neural network producing valid inequality operation - ">" and "<" - results in two output nodes and both being 0 indicating an equality) works with a single node hidden layer (note that here the mean normalization is applied to the inputs):
 
 * weights for comparing 0 and 1:
 
