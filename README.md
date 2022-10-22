@@ -42,7 +42,9 @@ For example, if node count is 4 and minimal layer node count is set to 1 then th
 
 # Results
 
-OR and AND operations work with a single node hidden layer (it would work with no hidden layers at all and weights going straight to the output node). Sample output for OR:
+OR and AND operations work with a single node hidden layer (it would work with no hidden layers at all and weights going straight to the output node).
+
+* Sample output for OR:
 
 ```
 0.weight [[2.2405872 2.2749467]]
@@ -51,7 +53,8 @@ OR and AND operations work with a single node hidden layer (it would work with n
 2.bias [-0.85417444]
 ```
 
-Sample output for AND:
+* Sample output for AND:
+
 ```
 0.weight [[-1.9562051 -1.9832208]]
 0.bias [2.1289062]
