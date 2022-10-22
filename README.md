@@ -18,7 +18,7 @@ python main.py
 
 # Implementation details
 
-* Each node of the previous layer is connected to each node of the following layer.
+* Each node of the previous layer is connected to each node of the following layer: $y = xA^T + b$
 * The input for the activation function of the following layer is calculated by summing the multiplication of incoming weights with incoming node values.
 * The activation function for each node is: $S(x)={\frac {1}{1+e^{-x}}}$
 * The loss function is: $J(\theta) = - \frac{1}{m} \displaystyle \sum_{i=1}^m [y^{(i)}\log (h_\theta (x^{(i)})) + (1 - y^{(i)})\log (1 - h_\theta(x^{(i)}))]$
